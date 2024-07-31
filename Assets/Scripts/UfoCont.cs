@@ -1,16 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))] 
 public class UfoCont : MonoBehaviour
 {
-    [SerializeField] private float _rotateSpeed;
+    [SerializeField] private float _flySpeed;
     [SerializeField] private float _forcePower;
     private CharacterController _ufo;
-    private float _gravity = -9.81f;
-    private float _velocity;
-    private float _rotateDir;
+    private float _gravity = -5f;
+    public float MoveDir { get; private set; }
     private bool _isForcing;
     
 
@@ -21,16 +18,17 @@ public class UfoCont : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Rotate();
+        MoveFD();
 
         if (_isForcing)
         {
-            
-            _velocity = -2;
+            AddForce();
+        }
+        else
+        {
+            DoGravity();
         }
         
-        
-        DoGravity();
         
     }
 
@@ -41,29 +39,33 @@ public class UfoCont : MonoBehaviour
         if(Input.GetKey(KeyCode.Space))
         {
             _isForcing = true;
-            AddForce();
+            
+        }
+        else
+        {
+            _isForcing = false;
         }
     }
 
     private void Move()
     {
-        _rotateDir = Input.GetAxis("Horizontal");
+        MoveDir = Input.GetAxis("Horizontal");
     }
 
     private void DoGravity()
     {
-        _velocity += _gravity * Time.fixedDeltaTime;
-        Vector3 localRotAngle = transform.localRotation.eulerAngles;
-        _ufo.Move(localRotAngle * _velocity * Time.fixedDeltaTime);
+        _ufo.Move(Vector3.up * _gravity * Time.fixedDeltaTime);
     } 
 
-    private void Rotate()
+    private void MoveFD()
     {
-        transform.Rotate(Vector3.right * _rotateDir * Time.fixedDeltaTime * _rotateSpeed);
+        _ufo.Move(Vector3.right * MoveDir * Time.fixedDeltaTime * _flySpeed);
     }
 
     private void AddForce()
-    {
-        _velocity = Mathf.Sqrt(_forcePower * -2 * _gravity);   
+    { 
+        _ufo.Move(Vector3.up * _forcePower * Time.fixedDeltaTime);
     }
+
+   
 }
